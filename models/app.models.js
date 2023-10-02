@@ -1,3 +1,4 @@
+
 const database = require("../db/connection.js")
 const { readFile } = require("fs/promises")
 
@@ -13,5 +14,12 @@ exports.fetchEndpoints = () => {
     .then((endpoints) => {
         return endpoints
     })
+}
 
+exports.fetchArticleById = (article_id) => {
+    
+    return database.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
+    .then((article) => {
+        return article.rows
+    })
 }
