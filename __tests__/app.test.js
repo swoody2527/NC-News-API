@@ -114,8 +114,51 @@ describe("GET api/articles" , () => {
                     comment_count: expect.any(String)
                 }))
             })
-            expect(body.articles).toBeSorted({ descending: true })
+            expect(body.articles).toBeSortedBy('created_at', {descending: true })
             expect(body.articles.hasOwnProperty('body')).toBe(false)
         })
     })
+})
+
+describe("GET /api/articles/:article_id/comments", () => {
+    it("should respond with 200 and an array of comments for the given article_id", () => {
+        const article_id = 5
+        return request(app)
+        .get(`/api/articles/${article_id}/comments`)
+        .expect(200)
+        .then(({ body }) => {
+            console.log(body.articleComments);
+            expect(body.articleComments.length).not.toBe(0)
+            body.articleComments.forEach((comment) => {
+                expect(comment).toEqual(expect.objectContaining({
+                    comment_id: expect.any(Number),
+                    votes: expect.any(Number),
+                    created_at: expect.any(String),
+                    author: expect.any(String),
+                    body: expect.any(String),
+                    article_id: 5
+                }))
+            })
+            expect(body.articleComments).toBeSortedBy('created_at', {descending: true })
+        })
+    })
+
+    it("should respond with 400 and bad query if article_id is NaN", () => {
+        return request(app)
+        .get('/api/articles/notanumber/comments')
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("invalid input for article_id")
+        })
+    })
+
+    it("should respond with 404 and id does not exist if article_id is out of bounds", () => {
+        return request(app)
+        .get('/api/articles/50/comments')
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("No comments found for that id")
+        })
+    })
+
 })
