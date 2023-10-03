@@ -39,3 +39,18 @@ exports.fetchArticles = () => {
     })
     
 }
+
+exports.fetchCommentsByArticleId = (article_id) => {
+    return database.query(`SELECT comment_id, articles.votes, comments.created_at, comments.author, comments.body, articles.article_id FROM comments 
+    JOIN articles ON comments.article_id = articles.article_id WHERE articles.article_id = $1 ORDER BY comments.created_at DESC;`, [article_id])
+    .then((comments) => {
+        if (!comments.rows.length) {
+            return Promise.reject({
+                status: 404,
+                msg: "No comments found for that id"
+            })
+        }
+        return comments.rows
+    })
+
+}
