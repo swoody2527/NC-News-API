@@ -16,9 +16,7 @@ exports.fetchEndpoints = () => {
     })
 }
 
-exports.fetchArticleById = (article_id) => {
-    console.log(article_id)
-    
+exports.fetchArticleById = (article_id) => { 
     return database.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
     .then((article) => {
         if (!article.rows.length) {
@@ -27,7 +25,17 @@ exports.fetchArticleById = (article_id) => {
                 msg: "No article found with that id"
             })
         }
-        console.log(article)
         return article.rows[0]
     })
+}
+
+exports.fetchArticles = () => {
+    return database.query(`SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, 
+    COUNT(comments.comment_id) AS comment_count  
+    FROM articles JOIN comments ON articles.article_id = comments.article_id 
+    GROUP BY articles.author, title, articles.article_id ORDER BY articles.created_at DESC;`)
+    .then((articles) => {
+        return articles.rows
+    })
+    
 }
