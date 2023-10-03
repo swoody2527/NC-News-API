@@ -17,9 +17,17 @@ exports.fetchEndpoints = () => {
 }
 
 exports.fetchArticleById = (article_id) => {
+    console.log(article_id)
     
     return database.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
     .then((article) => {
-        return article.rows
+        if (!article.rows.length) {
+            return Promise.reject({
+                status: 404,
+                msg: "No article found with that id"
+            })
+        }
+        console.log(article)
+        return article.rows[0]
     })
 }

@@ -22,7 +22,6 @@ describe("404 Upon Bad Path", () => {
     })
 })
 
-
 describe("GET api/topics", () => {
     it("should send 200 status upon a valid request and respond with all topics data", () => {
         return request(app)
@@ -57,32 +56,6 @@ describe("GET /api" , () => {
     })
 })
 
-/*
-
-
-
-Should:
-
-be available on /api/articles/:article_id.
-get an article by its id.
-Responds with:
-
-an article object, which should have the following properties:
-author
-title
-article_id
-body
-topic
-created_at
-votes
-article_img_url
-Consider what errors could occur with this endpoint, and make sure to test for them.
-
-Remember to add a description of this endpoint to your /api endpoint.
-
-*/
-
-
 describe("GET /api/articles/:article_id", () => {
     it("should respond with 200 and the correct article object", () => {
         const articleId = 3
@@ -90,17 +63,17 @@ describe("GET /api/articles/:article_id", () => {
         .get(`/api/articles/${articleId}`)
         .expect(200)
         .then(({ body }) => {
-            expect(body.article[0]).toEqual(expect.objectContaining({
+            console.log(body);
+            expect(body.article).toEqual(expect.objectContaining({
                 author: expect.any(String),
                 title: expect.any(String),
-                article_id: expect.any(Number),
+                article_id: 3,
                 body: expect.any(String),
                 topic: expect.any(String),
                 created_at: expect.any(String),
                 votes: expect.any(Number),
                 article_img_url: expect.any(String),
             }))
-            expect(body.article[0].article_id).toBe(articleId)
         })
     })
 
@@ -116,7 +89,7 @@ describe("GET /api/articles/:article_id", () => {
     it("should respond with 400 and id does not exist if article_id is out of bounds", () => {
         return request(app)
         .get('/api/articles/50')
-        .expect(400)
+        .expect(404)
         .then(({ body }) => {
             expect(body.msg).toBe("No article found with that id")
         })
