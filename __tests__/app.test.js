@@ -13,12 +13,14 @@ afterAll(() => {
     database.end()
 })
 
-// be available on /api/topics
-// get all topics
 
-// it should respond with an array
-// the array should contain topic objects
-// each object should have property of slug, description
+describe("404 Upon Bad Path", () => {
+    it("should respond with 404 upon bad path", () => {
+        return request(app)
+        .get('/invalidpath')
+        .expect(404)
+    })
+})
 
 describe("GET api/topics", () => {
     it("should send 200 status upon a valid request and respond with all topics data", () => {
@@ -33,29 +35,7 @@ describe("GET api/topics", () => {
             })
         })
     })
-    it("should respond with 404 upon invalid request", () => {
-        return request(app)
-        .get('/api/invalid')
-        .expect(404)
-    })
 })
-
-
-/* 
-SHOULD:
-be available on /api
-provide a description of all other endpoints
-
-RESPONDS WITH:
-an object describing all available endpoints on the API
-
-EACH ENDPOINT SHOULD INCLUDE:
-
-a brief description of the purpose and functionality of the endpoint.
-which queries are accepted.
-what format the request body needs to adhere to.
-what an example response looks like.
-*/
 
 const endpointDocs = require("../endpoints.json")
 describe("GET /api" , () => {
@@ -74,10 +54,44 @@ describe("GET /api" , () => {
             })
         })
     })
+})
 
-    it("should respond with 404 upon invalid request", () => {
+describe("GET /api/articles/:article_id", () => {
+    it("should respond with 200 and the correct article object", () => {
+        const articleId = 3
         return request(app)
-        .get("/invalid")
+        .get(`/api/articles/${articleId}`)
+        .expect(200)
+        .then(({ body }) => {
+            console.log(body);
+            expect(body.article).toEqual(expect.objectContaining({
+                author: expect.any(String),
+                title: expect.any(String),
+                article_id: 3,
+                body: expect.any(String),
+                topic: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                article_img_url: expect.any(String),
+            }))
+        })
+    })
+
+    it("should respond with 400 and bad query if article_id is NaN", () => {
+        return request(app)
+        .get('/api/articles/notanumber')
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("invalid input for article_id")
+        })
+    })
+
+    it("should respond with 400 and id does not exist if article_id is out of bounds", () => {
+        return request(app)
+        .get('/api/articles/50')
         .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("No article found with that id")
+        })
     })
 })
