@@ -127,7 +127,6 @@ describe("GET /api/articles/:article_id/comments", () => {
         .get(`/api/articles/${article_id}/comments`)
         .expect(200)
         .then(({ body }) => {
-            console.log(body.articleComments);
             expect(body.articleComments.length).not.toBe(0)
             body.articleComments.forEach((comment) => {
                 expect(comment).toEqual(expect.objectContaining({
@@ -157,8 +156,77 @@ describe("GET /api/articles/:article_id/comments", () => {
         .get('/api/articles/50/comments')
         .expect(404)
         .then(({ body }) => {
-            expect(body.msg).toBe("No comments found for that id")
+            expect(body.msg).toBe("No article found with that id")
         })
     })
 
+    it("should respond with 200 and empty array if id is valid but has no comments", () => {
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.articleComments).toEqual([])
+        })
+    })
+})
+
+describe("POST /api/articles/:article_id/comments" , () => {
+    it("should accept comment object and respond with 201 and posted comment" , () => {
+        const testId = 2
+        const testComment  = {
+            username: "butter_bridge",
+            body: "wow what an epic comment"
+        }
+        return request(app)
+        .post(`/api/articles/${testId}/comments`)
+        .send(testComment)
+        .expect(201)
+        .then(( {body }) => {
+            expect(body.postedComment).toMatchObject({
+                author: "butter_bridge",
+                body: "wow what an epic comment",
+                article_id: testId
+            })
+        })
+    })
+    it("should respond with 400 and error when no article exists at given id", () => {
+        const testComment  = {
+            username: "butter_bridge",
+            body: "wow what an epic comment"
+        }
+        return request(app)
+        .post(`/api/articles/1000/comments`)
+        .send(testComment)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("No article found with that id")
+        })
+    })
+    it("should respond with 400 and error if commentToPost has incorrect format", () => {
+        const testComment = {
+            invalidkey: "invalid",
+            body: "wow what an epic comment"
+        }
+        return request(app)
+        .post(`/api/articles/2/comments`)
+        .send(testComment)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("Invalid comment to post format")
+        })
+    })
+    it("should respond with 400 and error if username does not match anything on users", () => {
+        const testComment = {
+            username: "not_a_user",
+            body: "wow what an epic comment"
+        }
+        return request(app)
+        .post(`/api/articles/2/comments`)
+        .send(testComment)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.err).toBe('Key (author)=(not_a_user) is not present in table "users".')
+        })
+
+    })
 })

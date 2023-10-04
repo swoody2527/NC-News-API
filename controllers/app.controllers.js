@@ -1,4 +1,4 @@
-const { fetchTopics, fetchEndpoints, fetchArticleById, fetchArticles, fetchCommentsByArticleId } = require("../models/app.models.js")
+const { fetchTopics, fetchEndpoints, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId } = require("../models/app.models.js")
 
 
 exports.getTopics = (req, res, next) => {
@@ -42,4 +42,15 @@ exports.getCommentsByArticleId = (req, res, next) => {
     .catch((err) => {
         next(err)
     })
+}
+
+exports.postCommentByArticleId = (req, res, next) => {
+    const { article_id } = req.params
+    const commentToPost = req.body
+    insertCommentByArticleId(article_id, commentToPost)
+    .then((returnedComment) => res.status(201).send({postedComment: returnedComment}))
+    .catch((err) => {
+        next(err)
+    })
+
 }
