@@ -63,6 +63,29 @@
         "article_id": 5
       }
     ]
-
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "takes an object with body and author properties and adds a new comment at given article id returning the new object",
+    "queries": [],
+    "exampleResponse": {
+      "comment_id": 19,
+      "votes": 0,
+      "created_at": "2023-11-24T00:08:00.000Z",
+      "author": "butter_bridge",
+      "body": "Wow! what an epic comment",
+      "article_id": 5
+    }
+  },
+  "PATCH /api/articles/:article_id" : {
+    "description": "takes an object with property inc_votes and increments the votes at given article id returning the updated object",
+    "queries": [],
+    "exampleResponse": {
+      "comment_id": 19,
+      "votes": 20,
+      "created_at": "2023-11-24T00:08:00.000Z",
+      "author": "butter_bridge",
+      "body": "Wow! what an epic comment",
+      "article_id": 5
+    }
   }
 }

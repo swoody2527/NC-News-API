@@ -81,7 +81,7 @@ describe("GET /api/articles/:article_id", () => {
         .get('/api/articles/notanumber')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("invalid input for article_id")
+            expect(body.msg).toBe('invalid input syntax for type integer: "notanumber"')
         })
     })
 
@@ -127,7 +127,6 @@ describe("GET /api/articles/:article_id/comments", () => {
         .get(`/api/articles/${article_id}/comments`)
         .expect(200)
         .then(({ body }) => {
-            console.log(body.articleComments);
             expect(body.articleComments.length).not.toBe(0)
             body.articleComments.forEach((comment) => {
                 expect(comment).toEqual(expect.objectContaining({
@@ -148,7 +147,7 @@ describe("GET /api/articles/:article_id/comments", () => {
         .get('/api/articles/notanumber/comments')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("invalid input for article_id")
+            expect(body.msg).toBe('invalid input syntax for type integer: "notanumber"')
         })
     })
 
@@ -161,4 +160,103 @@ describe("GET /api/articles/:article_id/comments", () => {
         })
     })
 
+})
+
+
+
+/*
+
+Should:
+
+be available on /api/articles/:article_id.
+update an article by article_id.
+Request body accepts:
+
+an object in the form { inc_votes: newVote }.
+newVote will indicate how much the votes property in the database should be updated by, e.g.
+{ inc_votes : 1 } would increment the current article's vote property by 1
+{ inc_votes : -100 } would decrement the current article's vote property by 100
+Responds with:
+
+the updated article
+Consider what errors could occur with this endpoint, and make sure to test for them.
+
+// ERROR IF article doesnt exist
+// ERROR IF paramter object is of wrong format
+// error if paramater object is float
+// ERROR if trying to decrement votes below zero
+
+Remember to add a description of this endpoint to your /api endpoint.
+
+
+
+
+
+*/
+
+describe("PATCH /api/articles/:article_id" ,() => {
+    const positiveVotes = {inc_votes: 5}
+    const negativeVotes = {inc_votes: -5}
+
+    it("should accept an object indicating how many votes to increment article and respond with 200 and updated article", () => {
+        const testArticleId = 2
+        return request(app)
+        .patch(`/api/articles/${testArticleId}`)
+        .send(positiveVotes)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.updatedArticle).toMatchObject({
+                article_id: 2,
+                votes: 5,
+            })
+        })
+    })
+    it("should decrement votes of article object contains a negative number to increment by", () => {
+        const testArticleId = 1
+        return request(app)
+        .patch(`/api/articles/${testArticleId}`)
+        .send(negativeVotes)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.updatedArticle).toMatchObject({
+                article_id: 1,
+                votes: 95,
+            })
+        })
+
+    })
+    it("should produce 404 error and message if no article exists with id given", () => {
+        return request(app)
+        .patch(`/api/articles/1000`)
+        .send(positiveVotes)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("No article found with that id")
+        })
+    })
+
+    it("should produce 400 error and message if parameter object is wrong format", () => {
+        const invalidVotesObject = {
+            invalidkey: 5
+        }
+        return request(app)
+        .patch(`/api/articles/1`)
+        .send(invalidVotesObject)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("invalid patch format for updating votes")
+        })
+    })
+    it("should produce 400 error and message if parameter object correct format but number is float", () => {
+        const invalidVotesObject = {
+            inc_votes: 5.7
+        }
+        return request(app)
+        .patch(`/api/articles/1`)
+        .send(invalidVotesObject)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('invalid input syntax for type integer: "5.7"')
+        })
+    })
 })
