@@ -162,38 +162,6 @@ describe("GET /api/articles/:article_id/comments", () => {
 
 })
 
-
-
-/*
-
-Should:
-
-be available on /api/articles/:article_id.
-update an article by article_id.
-Request body accepts:
-
-an object in the form { inc_votes: newVote }.
-newVote will indicate how much the votes property in the database should be updated by, e.g.
-{ inc_votes : 1 } would increment the current article's vote property by 1
-{ inc_votes : -100 } would decrement the current article's vote property by 100
-Responds with:
-
-the updated article
-Consider what errors could occur with this endpoint, and make sure to test for them.
-
-// ERROR IF article doesnt exist
-// ERROR IF paramter object is of wrong format
-// error if paramater object is float
-// ERROR if trying to decrement votes below zero
-
-Remember to add a description of this endpoint to your /api endpoint.
-
-
-
-
-
-*/
-
 describe("PATCH /api/articles/:article_id" ,() => {
     const positiveVotes = {inc_votes: 5}
     const negativeVotes = {inc_votes: -5}
