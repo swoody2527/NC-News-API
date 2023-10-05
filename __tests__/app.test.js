@@ -84,6 +84,16 @@ describe("GET /api/articles/:article_id", () => {
         expect(body.msg).toBe("invalid input for article_id");
       });
   });
+  it("should respond with 400 and bad query if article_id is NaN", () => {
+    return request(app)
+      .get("/api/articles/notanumber")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe(
+          'invalid input syntax for type integer: "notanumber"'
+        );
+      });
+  });
 
   it("should respond with 400 and id does not exist if article_id is out of bounds", () => {
     return request(app)
@@ -143,37 +153,47 @@ describe("GET /api/articles/:article_id/comments", () => {
           );
         });
         expect(body.articleComments).toBeSortedBy("created_at", {
-          descending: true,
-        });
+            descending: true,
+        })
       });
   });
+});
 
-  it("should respond with 400 and bad query if article_id is NaN", () => {
-    return request(app)
-      .get("/api/articles/notanumber/comments")
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe("invalid input for article_id");
-      });
-  });
+it("should respond with 400 and bad query if article_id is NaN", () => {
+  return request(app)
+    .get("/api/articles/notanumber/comments")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("invalid input for article_id");
+    });
+});
+it("should respond with 400 and bad query if article_id is NaN", () => {
+  return request(app)
+    .get("/api/articles/notanumber/comments")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe(
+        'invalid input syntax for type integer: "notanumber"'
+      );
+    });
+});
 
-  it("should respond with 404 and id does not exist if article_id is out of bounds", () => {
-    return request(app)
-      .get("/api/articles/50/comments")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("No article found with that id");
-      });
-  });
+it("should respond with 404 and id does not exist if article_id is out of bounds", () => {
+  return request(app)
+    .get("/api/articles/50/comments")
+    .expect(404)
+    .then(({ body }) => {
+      expect(body.msg).toBe("No article found with that id");
+    });
+});
 
-  it("should respond with 200 and empty array if id is valid but has no comments", () => {
-    return request(app)
-      .get("/api/articles/2/comments")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.articleComments).toEqual([]);
-      });
-  });
+it("should respond with 200 and empty array if id is valid but has no comments", () => {
+  return request(app)
+    .get("/api/articles/2/comments")
+    .expect(200)
+    .then(({ body }) => {
+      expect(body.articleComments).toEqual([]);
+    });
 });
 
 describe("POST /api/articles/:article_id/comments", () => {
@@ -230,16 +250,16 @@ describe("POST /api/articles/:article_id/comments", () => {
       { body: "a perfectly valid comment body" },
       { author: "butter_bridge" },
     ];
-   const tests = testCases.map(testCase => {
-     return request(app)
-       .post(`/api/articles/2/comments`)
-       .send(testCase)
-       .expect(400)
-       .then(({ body }) => {
-         expect(body.msg).toBe("Invalid comment to post format");
-       });
-   });
-   return Promise.all(tests)
+    const tests = testCases.map((testCase) => {
+      return request(app)
+        .post(`/api/articles/2/comments`)
+        .send(testCase)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid comment to post format");
+        });
+    });
+    return Promise.all(tests);
   });
   it("should respond with 400 and error if username does not match anything on users", () => {
     const testComment = {
@@ -260,3 +280,69 @@ describe("POST /api/articles/:article_id/comments", () => {
 
 //What if the article id is invalid eg. /api/articles/runescape/comments?
 //What if the new comment object is missing a key or is empty? eg {body: 'who wrote me??'}
+
+describe("PATCH /api/articles/:article_id", () => {
+  const positiveVotes = { inc_votes: 5 };
+  const negativeVotes = { inc_votes: -5 };
+
+  it("should accept an object indicating how many votes to increment article and respond with 200 and updated article", () => {
+    const testArticleId = 2;
+    return request(app)
+      .patch(`/api/articles/${testArticleId}`)
+      .send(positiveVotes)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.updatedArticle).toMatchObject({
+          article_id: 2,
+          votes: 5,
+        });
+      });
+  });
+  it("should decrement votes of article object contains a negative number to increment by", () => {
+    const testArticleId = 1;
+    return request(app)
+      .patch(`/api/articles/${testArticleId}`)
+      .send(negativeVotes)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.updatedArticle).toMatchObject({
+          article_id: 1,
+          votes: 95,
+        });
+      });
+  });
+  it("should produce 404 error and message if no article exists with id given", () => {
+    return request(app)
+      .patch(`/api/articles/1000`)
+      .send(positiveVotes)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No article found with that id");
+      });
+  });
+
+  it("should produce 400 error and message if parameter object is wrong format", () => {
+    const invalidVotesObject = {
+      invalidkey: 5,
+    };
+    return request(app)
+      .patch(`/api/articles/1`)
+      .send(invalidVotesObject)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid patch format for updating votes");
+      });
+  });
+  it("should produce 400 error and message if parameter object correct format but number is float", () => {
+    const invalidVotesObject = {
+      inc_votes: 5.7,
+    };
+    return request(app)
+      .patch(`/api/articles/1`)
+      .send(invalidVotesObject)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('invalid input syntax for type integer: "5.7"');
+      });
+  });
+});
