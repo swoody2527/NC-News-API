@@ -19,7 +19,7 @@ exports.handle404Error = ((err, req, res, next) => {
 })
 
 
-exports.handle500Errors = (err, req, res, next) => {
+exports.handle500Errors = ((err, req, res, next) => {
   console.log(err, "Unhandled Error")
   res.status(500).send({ msg: "internal server error"})
-}
+})

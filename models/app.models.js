@@ -16,7 +16,7 @@ const fetchEndpoints = () => {
     })
 }
 
-const fetchArticleById = (article_id) => { 
+const fetchArticleById = (article_id) => {
     return database.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
     .then((article) => {
         if (!article.rows.length) {
