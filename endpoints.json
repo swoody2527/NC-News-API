@@ -87,5 +87,10 @@
       "body": "Wow! what an epic comment",
       "article_id": 5
     }
+  },
+  "CORE: DELETE /api/comments/:comment_id": {
+    "description": "deletes the comment located at the specified comment_id responds with no content",
+    "queries": [],
+    "exampleResponse": {}
   }
 }

@@ -1,7 +1,7 @@
 const express = require("express")
 const app = express()
-const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId ,patchVotesByArticleId } = require("./controllers/app.controllers.js")
-const { handleCustomErrors, handlePSQLError, handle404Error, handle500Error } = require("./errors/index.js")
+const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId ,patchVotesByArticleId, deleteCommentByCommentId } = require("./controllers/app.controllers.js")
+const { handleCustomErrors, handlePSQLError, handle404Error, handle500Errors } = require("./errors/index.js")
 app.use(express.json())
 
 app.get("/api/topics", getTopics)
@@ -18,10 +18,12 @@ app.post(`/api/articles/:article_id/comments`, postCommentByArticleId)
 
 app.patch("/api/articles/:article_id", patchVotesByArticleId)
 
+app.delete("/api/comments/:comment_id", deleteCommentByCommentId)
+
 app.use(handlePSQLError)
 
 app.use(handleCustomErrors)
 
-// app.use(handle500Error)
+app.use(handle500Errors)
 
 module.exports = { app }
