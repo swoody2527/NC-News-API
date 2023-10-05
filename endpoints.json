@@ -88,9 +88,20 @@
       "article_id": 5
     }
   },
-  "CORE: DELETE /api/comments/:comment_id": {
+  "DELETE /api/comments/:comment_id": {
     "description": "deletes the comment located at the specified comment_id responds with no content",
     "queries": [],
     "exampleResponse": {}
+  },
+  "GET /api/users": {
+    "description": "serves an array of all user objects stored on the database",
+    "queries": [],
+    "exampleResponse": [
+      {
+        "username": "butter_bridge",
+        "name": "jonny",
+        "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+      }
+    ]
   }
 }

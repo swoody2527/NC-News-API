@@ -1,29 +1,46 @@
-const express = require("express")
-const app = express()
-const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postCommentByArticleId ,patchVotesByArticleId, deleteCommentByCommentId } = require("./controllers/app.controllers.js")
-const { handleCustomErrors, handlePSQLError, handle404Error, handle500Errors } = require("./errors/index.js")
-app.use(express.json())
+const express = require("express");
+const app = express();
+const {
+  getTopics,
+  getEndpoints,
+  getArticleById,
+  getArticles,
+  getCommentsByArticleId,
+  postCommentByArticleId,
+  patchVotesByArticleId,
+  deleteCommentByCommentId,
+  getAllUsers
+} = require("./controllers/app.controllers.js");
+const {
+  handleCustomErrors,
+  handlePSQLError,
+  handle404Error,
+  handle500Errors,
+} = require("./errors/index.js");
+app.use(express.json());
 
-app.get("/api/topics", getTopics)
+app.get("/api/topics", getTopics);
 
-app.get("/api", getEndpoints)
+app.get("/api", getEndpoints);
 
-app.get("/api/articles/:article_id", getArticleById)
+app.get("/api/articles/:article_id", getArticleById);
 
-app.get("/api/articles", getArticles)
+app.get("/api/articles", getArticles);
 
-app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
-app.post(`/api/articles/:article_id/comments`, postCommentByArticleId)
+app.get("/api/users", getAllUsers)
 
-app.patch("/api/articles/:article_id", patchVotesByArticleId)
+app.post(`/api/articles/:article_id/comments`, postCommentByArticleId);
 
-app.delete("/api/comments/:comment_id", deleteCommentByCommentId)
+app.patch("/api/articles/:article_id", patchVotesByArticleId);
 
-app.use(handlePSQLError)
+app.delete("/api/comments/:comment_id", deleteCommentByCommentId);
 
-app.use(handleCustomErrors)
+app.use(handlePSQLError);
 
-app.use(handle500Errors)
+app.use(handleCustomErrors);
 
-module.exports = { app }
+app.use(handle500Errors);
+
+module.exports = { app };
