@@ -81,14 +81,6 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/notanumber")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("invalid input for article_id");
-      });
-  });
-  it("should respond with 400 and bad query if article_id is NaN", () => {
-    return request(app)
-      .get("/api/articles/notanumber")
-      .expect(400)
-      .then(({ body }) => {
         expect(body.msg).toBe(
           'invalid input syntax for type integer: "notanumber"'
         );
@@ -157,16 +149,7 @@ describe("GET /api/articles/:article_id/comments", () => {
         })
       });
   });
-});
 
-it("should respond with 400 and bad query if article_id is NaN", () => {
-  return request(app)
-    .get("/api/articles/notanumber/comments")
-    .expect(400)
-    .then(({ body }) => {
-      expect(body.msg).toBe("invalid input for article_id");
-    });
-});
 it("should respond with 400 and bad query if article_id is NaN", () => {
   return request(app)
     .get("/api/articles/notanumber/comments")
@@ -194,6 +177,8 @@ it("should respond with 200 and empty array if id is valid but has no comments",
     .then(({ body }) => {
       expect(body.articleComments).toEqual([]);
     });
+});
+
 });
 
 describe("POST /api/articles/:article_id/comments", () => {
@@ -241,7 +226,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send(testComment)
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("invalid input for article_id");
+        expect(body.msg).toBe("invalid input syntax for type integer: \"not_a_article_id\"");
       });
   });
   it("should respond with 400 and error if commentToPost has incorrect format", () => {
@@ -271,7 +256,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send(testComment)
       .expect(400)
       .then(({ body }) => {
-        expect(body.err).toBe(
+        expect(body.msg).toBe(
           'Key (author)=(not_a_user) is not present in table "users".'
         );
       });

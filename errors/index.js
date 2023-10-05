@@ -6,9 +6,9 @@ exports.handleCustomErrors = ((err, req, res, next) => {
 
 exports.handlePSQLError = ((err, req, res, next) => {
   if (err.code === "22P02") {
-    res.status(400).send({msg: "invalid input for article_id"})
-  } else if (err.code === "23503") {
     res.status(400).send({msg: err.message})
+  } else if (err.code === "23503") {
+    res.status(400).send({msg: err.detail})
   } else next(err)
 })
 

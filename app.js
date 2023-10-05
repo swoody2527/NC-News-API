@@ -18,12 +18,10 @@ app.post(`/api/articles/:article_id/comments`, postCommentByArticleId)
 
 app.patch("/api/articles/:article_id", patchVotesByArticleId)
 
-
-
 app.use(handlePSQLError)
 
 app.use(handleCustomErrors)
 
-app.use(handle500Error)
+// app.use(handle500Error)
 
 module.exports = { app }
