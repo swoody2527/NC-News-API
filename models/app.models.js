@@ -111,6 +111,11 @@ const removeCommentByCommentId = (comment_id) => {
   })
   }
 
+const fetchAllUsers = () => {
+  return database.query("SELECT username, name, avatar_url FROM users;")
+  .then((allUsers) => {return allUsers.rows})
+}
+
 module.exports = {
   fetchTopics,
   fetchEndpoints,
@@ -119,5 +124,6 @@ module.exports = {
   fetchArticleById,
   insertCommentByArticleId,
   updateVotesByArticleId,
-  removeCommentByCommentId
+  removeCommentByCommentId,
+  fetchAllUsers
 };

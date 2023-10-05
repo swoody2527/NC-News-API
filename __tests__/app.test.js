@@ -365,3 +365,21 @@ describe("DELETE /api/comments/:comment_id", () => {
     })
   })
 
+describe("GET /api/users", () => {
+  it("should respond with 200 and an array of all users", () => {
+    return request(app)
+    .get("/api/users")
+    .expect(200)
+    .then(({ body }) => {
+      expect(body.allUsers.length).not.toBe(0)
+      body.allUsers.forEach((user) => {
+        expect(user).toEqual(expect.objectContaining({
+          username: expect.any(String),
+          name: expect.any(String),
+          avatar_url: expect.any(String),
+        }))
+      })
+    }) 
+  })
+
+})
