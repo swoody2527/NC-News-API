@@ -2,21 +2,21 @@
 const database = require("../db/connection.js")
 const { readFile } = require("fs/promises")
 
-exports.fetchTopics = () => {
+const fetchTopics = () => {
     return database.query("SELECT * FROM topics;")
     .then((result) => {
         return result.rows
     })
 }
 
-exports.fetchEndpoints = () => {
+const fetchEndpoints = () => {
     return readFile("endpoints.json", "utf-8")
     .then((endpoints) => {
         return endpoints
     })
 }
 
-exports.fetchArticleById = (article_id) => { 
+const fetchArticleById = (article_id) => { 
     return database.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
     .then((article) => {
         if (!article.rows.length) {
@@ -29,7 +29,7 @@ exports.fetchArticleById = (article_id) => {
     })
 }
 
-exports.fetchArticles = () => {
+const fetchArticles = () => {
     return database.query(`SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, 
     COUNT(comments.comment_id) AS comment_count  
     FROM articles JOIN comments ON articles.article_id = comments.article_id 
@@ -40,7 +40,7 @@ exports.fetchArticles = () => {
     
 }
 
-exports.fetchCommentsByArticleId = (article_id) => {
+const fetchCommentsByArticleId = (article_id) => {
     return database.query(`SELECT comment_id, articles.votes, comments.created_at, comments.author, comments.body, articles.article_id FROM comments 
     JOIN articles ON comments.article_id = articles.article_id WHERE articles.article_id = $1 ORDER BY comments.created_at DESC;`, [article_id])
     .then((comments) => {
@@ -52,5 +52,23 @@ exports.fetchCommentsByArticleId = (article_id) => {
         }
         return comments.rows
     })
-
 }
+
+const updateVotesByArticleId = (article_id, votesToIncrement) => {
+    if (!votesToIncrement) {
+        return Promise.reject({
+            status: 400,
+            msg: "invalid patch format for updating votes"
+        })
+    }
+    return fetchArticleById(article_id)
+    .then(() => {
+        return database.query(`UPDATE articles SET votes = votes + $1 
+        WHERE article_id = $2 RETURNING *;`, [votesToIncrement, article_id])
+    .then((updatedArticle) => {return updatedArticle.rows[0]})
+
+    })
+}
+
+
+module.exports = {fetchTopics, fetchEndpoints, fetchArticleById, fetchArticles, fetchCommentsByArticleId, updateVotesByArticleId}

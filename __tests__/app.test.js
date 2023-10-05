@@ -81,7 +81,7 @@ describe("GET /api/articles/:article_id", () => {
         .get('/api/articles/notanumber')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("invalid input for article_id")
+            expect(body.msg).toBe('invalid input syntax for type integer: "notanumber"')
         })
     })
 
@@ -127,7 +127,6 @@ describe("GET /api/articles/:article_id/comments", () => {
         .get(`/api/articles/${article_id}/comments`)
         .expect(200)
         .then(({ body }) => {
-            console.log(body.articleComments);
             expect(body.articleComments.length).not.toBe(0)
             body.articleComments.forEach((comment) => {
                 expect(comment).toEqual(expect.objectContaining({
@@ -148,7 +147,7 @@ describe("GET /api/articles/:article_id/comments", () => {
         .get('/api/articles/notanumber/comments')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe("invalid input for article_id")
+            expect(body.msg).toBe('invalid input syntax for type integer: "notanumber"')
         })
     })
 
@@ -161,4 +160,71 @@ describe("GET /api/articles/:article_id/comments", () => {
         })
     })
 
+})
+
+describe("PATCH /api/articles/:article_id" ,() => {
+    const positiveVotes = {inc_votes: 5}
+    const negativeVotes = {inc_votes: -5}
+
+    it("should accept an object indicating how many votes to increment article and respond with 200 and updated article", () => {
+        const testArticleId = 2
+        return request(app)
+        .patch(`/api/articles/${testArticleId}`)
+        .send(positiveVotes)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.updatedArticle).toMatchObject({
+                article_id: 2,
+                votes: 5,
+            })
+        })
+    })
+    it("should decrement votes of article object contains a negative number to increment by", () => {
+        const testArticleId = 1
+        return request(app)
+        .patch(`/api/articles/${testArticleId}`)
+        .send(negativeVotes)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.updatedArticle).toMatchObject({
+                article_id: 1,
+                votes: 95,
+            })
+        })
+
+    })
+    it("should produce 404 error and message if no article exists with id given", () => {
+        return request(app)
+        .patch(`/api/articles/1000`)
+        .send(positiveVotes)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe("No article found with that id")
+        })
+    })
+
+    it("should produce 400 error and message if parameter object is wrong format", () => {
+        const invalidVotesObject = {
+            invalidkey: 5
+        }
+        return request(app)
+        .patch(`/api/articles/1`)
+        .send(invalidVotesObject)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe("invalid patch format for updating votes")
+        })
+    })
+    it("should produce 400 error and message if parameter object correct format but number is float", () => {
+        const invalidVotesObject = {
+            inc_votes: 5.7
+        }
+        return request(app)
+        .patch(`/api/articles/1`)
+        .send(invalidVotesObject)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('invalid input syntax for type integer: "5.7"')
+        })
+    })
 })
