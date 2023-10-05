@@ -263,9 +263,6 @@ describe("POST /api/articles/:article_id/comments", () => {
   });
 });
 
-//What if the article id is invalid eg. /api/articles/runescape/comments?
-//What if the new comment object is missing a key or is empty? eg {body: 'who wrote me??'}
-
 describe("PATCH /api/articles/:article_id", () => {
   const positiveVotes = { inc_votes: 5 };
   const negativeVotes = { inc_votes: -5 };
@@ -331,3 +328,40 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
+
+describe("DELETE /api/comments/:comment_id", () => {
+  it("should respond 204 and delete the comment located at given comment_id", () => {
+    const comment_id = 1
+    return request(app)
+    .delete(`/api/comments/${comment_id}`)
+    .expect(204)
+    .then((response) => {
+      expect(response.body).toEqual({})
+    })
+    })
+    it("should 404 error if trying to delete if the id does not exist", () => {
+      return request(app)
+      .delete(`/api/comments/5000`)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("no comment with that id exists")
+      })
+    })
+    it("should 400 error if comment id is not a number", () => {
+      return request(app)
+      .delete(`/api/comments/notanumber`)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid input syntax for type integer: \"notanumber\"")
+      })
+    })
+    it("should 400 error if comment id is not an integer", () => {
+      return request(app)
+      .delete(`/api/comments/3.2`)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid input syntax for type integer: \"3.2\"")
+      })
+    })
+  })
+

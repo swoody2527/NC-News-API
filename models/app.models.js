@@ -1,3 +1,4 @@
+const { log } = require("console");
 const database = require("../db/connection.js");
 const { readFile } = require("fs/promises");
 
@@ -95,6 +96,21 @@ const updateVotesByArticleId = (article_id, votesToIncrement) => {
   });
 };
 
+const removeCommentByCommentId = (comment_id) => {
+  return database.query("SELECT * FROM comments WHERE comment_id = $1", [comment_id])
+  .then((comments) => {
+    if (!comments.rows.length) {
+      return Promise.reject({
+        status: 404,
+        msg: "no comment with that id exists"
+      })
+    } else {
+      return database.query("DELETE FROM comments WHERE comment_id = $1 RETURNING *;", [comment_id])
+      .then((response) => {return response.rows[0]})
+    }
+  })
+  }
+
 module.exports = {
   fetchTopics,
   fetchEndpoints,
@@ -103,4 +119,5 @@ module.exports = {
   fetchArticleById,
   insertCommentByArticleId,
   updateVotesByArticleId,
+  removeCommentByCommentId
 };

@@ -1,4 +1,4 @@
-const { fetchTopics, fetchEndpoints, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId ,updateVotesByArticleId } = require("../models/app.models.js")
+const { fetchTopics, fetchEndpoints, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId ,updateVotesByArticleId, removeCommentByCommentId } = require("../models/app.models.js")
 
 
 exports.getTopics = (req, res, next) => {
@@ -58,6 +58,15 @@ exports.patchVotesByArticleId = (req, res, next) => {
     const {article_id} = req.params
     const votesToIncrement = req.body.inc_votes
     updateVotesByArticleId(article_id, votesToIncrement).then((updatedArticle) => res.status(200).send({updatedArticle}))
+    .catch((err) => {
+        next(err)
+    })
+}
+
+exports.deleteCommentByCommentId = (req, res, next) => {
+    const {comment_id} = req.params;
+    removeCommentByCommentId(comment_id)
+    .then((response) => res.status(204).send(response))
     .catch((err) => {
         next(err)
     })
