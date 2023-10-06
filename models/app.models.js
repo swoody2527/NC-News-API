@@ -27,18 +27,33 @@ const fetchArticleById = (article_id) => {
     });
 };
 
-const fetchArticles = () => {
+const fetchArticles = (queries) => {
+  if (Object.keys(queries).length) {
+    if (!queries.topic) {
+      return Promise.reject({
+        status: 400,
+        msg: "Invalid query for /api/articles"
+      })
+    }
+  }
+
+  const queryValues = []
+  let queryStr = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, 
+  COUNT(comments.comment_id) AS comment_count  
+  FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id`
+  
+  if (queries.topic) {
+    queryValues.push(queries.topic)
+    queryStr += ` WHERE topic = $1`
+  }
+  queryStr += ` GROUP BY articles.author, title, articles.article_id ORDER BY articles.created_at DESC;`
   return database
-    .query(
-      `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, 
-    COUNT(comments.comment_id) AS comment_count  
-    FROM articles JOIN comments ON articles.article_id = comments.article_id 
-    GROUP BY articles.author, title, articles.article_id ORDER BY articles.created_at DESC;`
-    )
+    .query(queryStr, queryValues)
     .then((articles) => {
       return articles.rows;
     });
 };
+
 
 const fetchCommentsByArticleId = (article_id) => {
   return fetchArticleById(article_id) //CHECKS IF ARTICLE EXISTS

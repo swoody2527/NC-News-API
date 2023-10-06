@@ -97,13 +97,13 @@ describe("GET /api/articles/:article_id", () => {
   });
 });
 
-describe("GET api/articles", () => {
+describe.only("GET api/articles", () => {
   it("should respond with 200 and an array of all articles with correct properties", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles.length).not.toBe(0);
+        expect(body.articles.length).toBe(13);
         body.articles.forEach((article) => {
           expect(article).toEqual(
             expect.objectContaining({
@@ -122,6 +122,34 @@ describe("GET api/articles", () => {
         expect(body.articles.hasOwnProperty("body")).toBe(false);
       });
   });
+  it("should filter by topic query if provided", () => {
+    return request(app)
+    .get("/api/articles/?topic=cats")
+    .expect(200)
+    .then(({ body }) => {
+      body.articles.forEach((article) => {
+        expect(article).toEqual(expect.objectContaining({
+          topic: "cats"
+        }))
+      })
+    })
+  })
+  it("should respond with 400 error if query is not supported", () => {
+    return request(app)
+    .get("/api/articles?votes=0")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Invalid query for /api/articles")
+    })
+  })
+  it("should respond with 400 error if query is invalid", () => {
+    return request(app)
+    .get("/api/articles?invalid=5")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Invalid query for /api/articles")
+    })
+  })
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
