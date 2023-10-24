@@ -20,7 +20,9 @@ exports.getTopics = (req, res, next) => {
 
 exports.getEndpoints = (req, res, next) => {
   fetchEndpoints()
-    .then((endpoints) => res.status(200).send({ endpoints }))
+    .then((endpoints) => {
+      res.status(200).send(endpoints)
+})
     .catch((err) => {
       next(err);
     });

@@ -39,8 +39,8 @@ describe("GET /api", () => {
     return request(app)
       .get("/api")
       .expect(200)
-      .then(({ body }) => {
-        let parsedEndpoints = JSON.parse(body.endpoints);
+      .then(( body ) => {
+        let parsedEndpoints = JSON.parse(body.text);
         const responseKeys = Object.keys(parsedEndpoints);
         expect(responseKeys.length).toBe(Object.keys(endpointDocs).length);
         responseKeys.forEach((key) => {
