@@ -10,7 +10,7 @@ const fetchTopics = () => {
 
 const fetchEndpoints = () => {
   return readFile("endpoints.json", "utf-8").then((endpoints) => {
-    return endpoints;
+    return JSON.parse(endpoints);
   });
 };
 const fetchArticleById = (article_id) => {
