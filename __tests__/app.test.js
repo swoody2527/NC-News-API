@@ -137,7 +137,7 @@ describe("GET api/articles", () => {
     })
   })
 
-  it.only("should sortby if valid query provided", () => {
+  it("should sortby if valid query provided", () => {
     return request(app)
     .get("/api/articles/?sort_by=votes")
     .expect(200)
@@ -147,7 +147,7 @@ describe("GET api/articles", () => {
     })
   })
 
-  it.only("should reject attempt to sort by and invalid column", () => {
+  it("should reject attempt to sort by and invalid column", () => {
     return request(app)
     .get("/api/articles/?sort_by=invalid")
     .expect(400)
