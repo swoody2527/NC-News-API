@@ -138,7 +138,7 @@ describe("GET api/articles", () => {
   })
   it("should respond with 400 error if query is not supported", () => {
     return request(app)
-    .get("/api/articles?votes=0")
+    .get("/api/articles?author=grumpy19")
     .expect(400)
     .then(({ body }) => {
       expect(body.msg).toBe("Invalid query for /api/articles")

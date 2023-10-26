@@ -31,7 +31,7 @@ const fetchArticleById = (article_id) => {
 
 const fetchArticles = (queries) => {
   if (Object.keys(queries).length) {
-    if (!queries.topic) {
+    if (!queries.topic && !queries.date && !queries.comment_count && !queries.votes) {
       return Promise.reject({
         status: 400,
         msg: "Invalid query for /api/articles"
@@ -46,9 +46,31 @@ const fetchArticles = (queries) => {
   
   if (queries.topic) {
     queryValues.push(queries.topic)
-    queryStr += ` WHERE topic = $1`
+    queryStr += ` WHERE topic = $${queryValues.length}`
   }
-  queryStr += ` GROUP BY articles.author, title, articles.article_id ORDER BY articles.created_at DESC;`
+
+  if (queries.date) {
+    queryValues.push(queries.date)
+    queryStr += ` WHERE topic = $${queryValues.length}`
+  }
+
+  if (queries.comment_count) {
+    queryValues.push(queries.comment_count)
+    queryStr += ` WHERE topic = $${queryValues.length}`
+  }
+
+  if (queries.votes) {
+    queryValues.push(queries.votes)
+    queryStr += ` WHERE topic = $${queryValues.length}`
+  }
+  queryStr += ` GROUP BY articles.author, title, articles.article_id`
+  
+  if (queries.sortBy && (queries.sortBy === 'asc' || 'desc')) {
+    queryValues.push(queries.sortBy)
+    queryStr += ` ORDER BY articles.created_at ${queries.sortBy.toUpperCase()} `
+  } else {
+    queryStr += ' ORDER BY articles.created_at DESC'
+  }
   return database
     .query(queryStr, queryValues)
     .then((articles) => {
