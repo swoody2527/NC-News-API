@@ -39,7 +39,7 @@ const fetchArticles = (queries) => {
       !queries.date &&
       !queries.comment_count &&
       !queries.votes &&
-      !queries.sort_by &&
+      !queries.sortby &&
       !queries.order
     ) {
       return Promise.reject({
@@ -78,15 +78,15 @@ const fetchArticles = (queries) => {
     "comment_count",
   ];
   
-  if (queries.sort_by) {
-    if (!validSortBy.includes(queries.sort_by)) {
+  if (queries.sortby) {
+    if (!validSortBy.includes(queries.sortby)) {
       return Promise.reject({
         status: 400,
         msg: "Invalid sortby query for /api/articles",
       });
     }
     
-    queryStr += ` ORDER BY ${queries.sort_by}`;
+    queryStr += ` ORDER BY ${queries.sortby}`;
     if (
       queries.order &&
       (queries.order.toLowerCase() === "asc" ||
