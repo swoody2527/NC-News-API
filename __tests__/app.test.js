@@ -137,13 +137,23 @@ describe("GET api/articles", () => {
     })
   })
 
-  it("should sortby if valid query provided", () => {
+  it("should sortby if valid query provided and default to desc", () => {
     return request(app)
     .get("/api/articles/?sort_by=votes")
     .expect(200)
     .then(({ body }) => {
       expect(body.articles.length).not.toBe(1)
       expect(body.articles).toBeSortedBy("votes", { descending: true})
+    })
+  })
+
+  it("should sortby asc if specified", () => {
+    return request(app)
+    .get("/api/articles/?sort_by=votes&order=asc")
+    .expect(200)
+    .then(({ body }) => {
+      expect(body.articles.length).not.toBe(1)
+      expect(body.articles).toBeSortedBy("votes", { ascending: true})
     })
   })
 

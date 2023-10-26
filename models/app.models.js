@@ -39,7 +39,8 @@ const fetchArticles = (queries) => {
       !queries.date &&
       !queries.comment_count &&
       !queries.votes &&
-      !queries.sort_by
+      !queries.sort_by &&
+      !queries.order
     ) {
       return Promise.reject({
         status: 400,
