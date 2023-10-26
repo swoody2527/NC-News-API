@@ -15,9 +15,12 @@ const fetchEndpoints = () => {
 };
 const fetchArticleById = (article_id) => {
   return database
-    .query(`SELECT articles.author, title, articles.article_id, articles.body, topic, articles.created_at, articles.votes, article_img_url, 
+    .query(
+      `SELECT articles.author, title, articles.article_id, articles.body, topic, articles.created_at, articles.votes, article_img_url, 
     COUNT(comments.article_id) AS comment_count FROM articles 
-    LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id;`, [article_id])
+    LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id;`,
+      [article_id]
+    )
     .then((article) => {
       if (!article.rows.length) {
         return Promise.reject({
@@ -31,53 +34,75 @@ const fetchArticleById = (article_id) => {
 
 const fetchArticles = (queries) => {
   if (Object.keys(queries).length) {
-    if (!queries.topic && !queries.date && !queries.comment_count && !queries.votes) {
+    if (
+      !queries.topic &&
+      !queries.date &&
+      !queries.comment_count &&
+      !queries.votes &&
+      !queries.sort_by
+    ) {
       return Promise.reject({
         status: 400,
-        msg: "Invalid query for /api/articles"
-      })
+        msg: "Invalid query for /api/articles",
+      });
     }
   }
 
-  const queryValues = []
+  const queryValues = [];
   let queryStr = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, articles.body, 
   COUNT(comments.comment_id) AS comment_count  
-  FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id`
-  
+  FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id`;
+
   if (queries.topic) {
-    queryValues.push(queries.topic)
-    queryStr += ` WHERE topic = $${queryValues.length}`
+    queryValues.push(queries.topic);
+    queryStr += ` WHERE topic = $${queryValues.length}`;
   }
 
   if (queries.date) {
-    queryValues.push(queries.date)
-    queryStr += ` WHERE topic = $${queryValues.length}`
+    queryValues.push(queries.date);
+    queryStr += ` WHERE created_at = $${queryValues.length}`;
   }
 
-  if (queries.comment_count) {
-    queryValues.push(queries.comment_count)
-    queryStr += ` WHERE topic = $${queryValues.length}`
-  }
+  queryStr += ` GROUP BY articles.author, title, articles.article_id`;
 
-  if (queries.votes) {
-    queryValues.push(queries.votes)
-    queryStr += ` WHERE topic = $${queryValues.length}`
-  }
-  queryStr += ` GROUP BY articles.author, title, articles.article_id`
+  const validSortBy = [
+    "author",
+    "title",
+    "article_id",
+    "topic",
+    "created_at",
+    "votes",
+    "article_img_url",
+    "body",
+    "comment_count",
+  ];
   
-  if (queries.sortBy && (queries.sortBy === 'asc' || 'desc')) {
-    queryValues.push(queries.sortBy)
-    queryStr += ` ORDER BY articles.created_at ${queries.sortBy.toUpperCase()} `
+  if (queries.sort_by) {
+    if (!validSortBy.includes(queries.sort_by)) {
+      return Promise.reject({
+        status: 400,
+        msg: "Invalid sortby query for /api/articles",
+      });
+    }
+    
+    queryStr += ` ORDER BY ${queries.sort_by}`;
+    if (
+      queries.order &&
+      (queries.order.toLowerCase() === "asc" ||
+        queries.order.toLowerCase() === "desc")
+    ) {
+      queryStr += ` ${queries.order.toUpperCase()}`;
+    } else {
+      queryStr += ` DESC`;
+    }
   } else {
-    queryStr += ' ORDER BY articles.created_at DESC'
+    queryStr += ` ORDER BY articles.created_at DESC`;
   }
-  return database
-    .query(queryStr, queryValues)
-    .then((articles) => {
-      return articles.rows;
-    });
-};
 
+  return database.query(queryStr, queryValues).then((articles) => {
+    return articles.rows;
+  });
+};
 
 const fetchCommentsByArticleId = (article_id) => {
   return fetchArticleById(article_id) //CHECKS IF ARTICLE EXISTS
@@ -136,24 +161,33 @@ const updateVotesByArticleId = (article_id, votesToIncrement) => {
 };
 
 const removeCommentByCommentId = (comment_id) => {
-  return database.query("SELECT * FROM comments WHERE comment_id = $1", [comment_id])
-  .then((comments) => {
-    if (!comments.rows.length) {
-      return Promise.reject({
-        status: 404,
-        msg: "no comment with that id exists"
-      })
-    } else {
-      return database.query("DELETE FROM comments WHERE comment_id = $1 RETURNING *;", [comment_id])
-      .then((response) => {return response.rows[0]})
-    }
-  })
-  }
+  return database
+    .query("SELECT * FROM comments WHERE comment_id = $1", [comment_id])
+    .then((comments) => {
+      if (!comments.rows.length) {
+        return Promise.reject({
+          status: 404,
+          msg: "no comment with that id exists",
+        });
+      } else {
+        return database
+          .query("DELETE FROM comments WHERE comment_id = $1 RETURNING *;", [
+            comment_id,
+          ])
+          .then((response) => {
+            return response.rows[0];
+          });
+      }
+    });
+};
 
 const fetchAllUsers = () => {
-  return database.query("SELECT username, name, avatar_url FROM users;")
-  .then((allUsers) => {return allUsers.rows})
-}
+  return database
+    .query("SELECT username, name, avatar_url FROM users;")
+    .then((allUsers) => {
+      return allUsers.rows;
+    });
+};
 
 module.exports = {
   fetchTopics,
@@ -164,5 +198,5 @@ module.exports = {
   insertCommentByArticleId,
   updateVotesByArticleId,
   removeCommentByCommentId,
-  fetchAllUsers
+  fetchAllUsers,
 };

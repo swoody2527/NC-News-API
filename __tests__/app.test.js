@@ -136,6 +136,31 @@ describe("GET api/articles", () => {
       })
     })
   })
+
+  it.only("should sortby if valid query provided", () => {
+    return request(app)
+    .get("/api/articles/?sort_by=votes")
+    .expect(200)
+    .then(({ body }) => {
+      expect(body.articles.length).not.toBe(1)
+      expect(body.articles).toBeSortedBy("votes", { descending: true})
+    })
+  })
+
+  it.only("should reject attempt to sort by and invalid column", () => {
+    return request(app)
+    .get("/api/articles/?sort_by=invalid")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Invalid sortby query for /api/articles")
+    })
+  })
+
+  
+
+
+
+  
   it("should respond with 400 error if query is not supported", () => {
     return request(app)
     .get("/api/articles?author=grumpy19")
